@@ -1,4 +1,7 @@
 Started at 12:09pm CEST, will try to make commits often
+# DO NOT RUN THIS CODE UNLESS YOU KNOW ABSOLUTELY WHAT YOU ARE DOING
+
+It is harmless as it is not retrieving random answers but still, proceed with caution.
 
 # Challenge:
 > Please don't go over 2 hours for this one. The goal isn't to finish. I want to see your process so > use comments and pseudocode as necessary. Please complete it in your language of your choice > (JavaScript/TypeScript or Python are preferred). Your choice.
