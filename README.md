@@ -1,0 +1,1 @@
+Started at 12:09pm CEST, will try to make commits often
