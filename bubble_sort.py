@@ -46,22 +46,27 @@ def extract_code_blocks_html(answer_id):
 def guess_list_var_name(code, remove_assignment=True):
     # we assume that there is an assignment line where the example assigns an example array to a value
     code_lines = code.split('\n')
+    var_name = None
     for i,line in enumerate(code_lines):
+        if 'print' in line:
+            del code_lines[i]
+            continue
         try:
             left, right = [x.strip() for x in line.split('=')]
             if right[0] == '[' and right[-1] == ']' and len(left.split()) == 1:
                 if remove_assignment:
                     del code_lines[i]
-                return left, '\n'.join(code_lines)
+                var_name = left
         except: # Not ideal to capture all but we have no idea what we're dealing with
             continue
+    return var_name, '\n'.join(code_lines)
 
             
 def run_code_on_user_list(user_list, code):
     array_var_name, code_without_assignment = guess_list_var_name(code)
-    code = f'{array_var_name} = {user_list}\n' + code
+    updated_code = f'{array_var_name} = {user_list}\n' + code_without_assignment
     try:
-        exec(code) # this is SOOO insecure
+        exec(updated_code) # this is SOOO insecure
     except:
         raise ValueError
 

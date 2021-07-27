@@ -28,7 +28,20 @@ Probably searching for `<code>` blocks would be enough
 
 ## Security
 We'll be running random code from the internet, need to make sure it's run in a safe environment. 
+Ran out of time to work on this.
+
 
 # Method
-## Client
-Create a lightweight API client for search and retrieval
+
+- Create a lightweight API client for search and retrieval. Search questions 
+for `bubble sort` in title and `python` in tags.
+- Retrieve list of accepted answers for the questions
+- Get each answer and search for code blocks.
+- Check if code block includes an assignment for an array
+- Replace the assigned array with user input and evaluate the code
+- return the variable value
+
+## Assumptions
+- The code mutates the input array
+- The code is not harmful (or use docker)
+
