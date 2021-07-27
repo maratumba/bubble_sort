@@ -1,3 +1,4 @@
+#!/bin/env python3
 import requests
 from requests.compat import urljoin
 from lxml import html
@@ -26,10 +27,11 @@ def get_answer_html(answer_id):
     answer_url = get_answer_url(answer_id)
     resp = requests.get(answer_url)
     if resp.status_code == 200:
-        return resp.content
+        return resp.content.decode()
 
-def extract_code_html(answer_html, answer_id):
+def extract_code_blocks_html(answer_id):
     # returns code only string
+    answer_html = get_answer_html(answer_id)
     tree = html.fromstring(answer_html)
     # this removes the indentation so not very useful:
     # answer_code_blocks = tree.xpath(f'//div[@id="answer-{accepted_answer_ids[0]}"]//code/text()')
@@ -41,17 +43,55 @@ def extract_code_html(answer_html, answer_id):
     return codes
 
 
-def guess_list_var_name(code):
-    for line in code:
+def guess_list_var_name(code, remove_assignment=True):
+    # we assume that there is an assignment line where the example assigns an example array to a value
+    code_lines = code.split('\n')
+    for i,line in enumerate(code_lines):
         try:
             left, right = [x.strip() for x in line.split('=')]
             if right[0] == '[' and right[-1] == ']' and len(left.split()) == 1:
-                return left
+                if remove_assignment:
+                    del code_lines[i]
+                return left, '\n'.join(code_lines)
         except: # Not ideal to capture all but we have no idea what we're dealing with
-            # not my tempo
             continue
 
             
-def run_code_on_list(l, code, array_var_name):
-    l = guess_list_var_name
+def run_code_on_user_list(user_list, code):
+    array_var_name, code_without_assignment = guess_list_var_name(code)
+    code = f'{array_var_name} = {user_list}\n' + code
+    try:
+        exec(code) # this is SOOO insecure
+    except:
+        raise ValueError
 
+    return eval(array_var_name)
+
+
+def main(*args, **kwargs):
+    user_input = input('Hello! Please provide a list of integers.\n')
+    # validate:
+    try:
+        numbers = list(map(lambda x: int(x.strip()),user_input.split(',')))
+    except ValueError:
+        print(f'Not my tempo, supposed to be a list of integers, seperated by commas: {user_input}')
+        return
+
+    print('Thanks. Fetching a random bubble sort implementation. Fingers crossed.')
+    accepted_answer_ids = get_accepted_answers()
+    if accepted_answer_ids:
+        for answer_id in accepted_answer_ids:
+            codes = extract_code_blocks_html(answer_id)
+            print(f'Trying answer {answer_id}:')
+            for code in codes:
+                try:
+                    result = run_code_on_user_list(numbers, code)
+                    print(result)
+                    return
+                except ValueError:
+                    continue
+                except TypeError:
+                    continue
+
+if __name__ == '__main__':
+    main()
