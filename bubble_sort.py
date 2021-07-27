@@ -28,5 +28,30 @@ def get_answer_html(answer_id):
     if resp.status_code == 200:
         return resp.content
 
-def parse_answer_html(answer_html):
+def extract_code_html(answer_html, answer_id):
     # returns code only string
+    tree = html.fromstring(answer_html)
+    # this removes the indentation so not very useful:
+    # answer_code_blocks = tree.xpath(f'//div[@id="answer-{accepted_answer_ids[0]}"]//code/text()')
+    # big code blocks are wrapped in <code class="hljs language-python"></code>
+    # need to extract the code block intact with indentation
+    # After spending a considerable time, realized that some attributes of the code blocks are not server side rendered
+    # this gives us all the full code blocks:
+    codes = tree.xpath(f"//div[@data-answerid='{answer_id}']//pre/code/text()") # returns a list of code blocks
+    return codes
+
+
+def guess_list_var_name(code):
+    for line in code:
+        try:
+            left, right = [x.strip() for x in line.split('=')]
+            if right[0] == '[' and right[-1] == ']' and len(left.split()) == 1:
+                return left
+        except: # Not ideal to capture all but we have no idea what we're dealing with
+            # not my tempo
+            continue
+
+            
+def run_code_on_list(l, code, array_var_name):
+    l = guess_list_var_name
+
